@@ -6,6 +6,14 @@ Project AI Systems tập trung vào một bài toán vận hành có ranh giới
 
 > 100% dữ liệu là dữ liệu tổng hợp. Project không liên kết với Bệnh viện Thiện Hạnh hay bất kỳ cơ sở y tế cụ thể nào; không chẩn đoán và không tự động từ chối, hủy hoặc dời lịch khám.
 
+## Dùng trực tuyến
+
+- Ứng dụng: [https://appointment-risk-system.onrender.com](https://appointment-risk-system.onrender.com)
+- OpenAPI: [https://appointment-risk-system.onrender.com/docs](https://appointment-risk-system.onrender.com/docs)
+- Health check: [https://appointment-risk-system.onrender.com/health](https://appointment-risk-system.onrender.com/health)
+
+Render Free có thể tạm dừng dịch vụ khi không có truy cập; lần mở đầu tiên đôi khi cần chờ khoảng 30–60 giây.
+
 ## Vì sao tôi làm project này
 
 Tôi muốn chứng minh khả năng nối các phần thường bị tách rời trong một bài ML: dữ liệu đầu vào, đánh giá trung thực, giới hạn vận hành, phục vụ mô hình và giám sát sau triển khai. Câu hỏi chính không chỉ là “mô hình chính xác bao nhiêu” mà còn là:
