@@ -35,7 +35,7 @@ Synthetic generator ──> validation ──> CSV + SQLite
           v                    v
     FastAPI online       batch scoring
           │
-          ├── web demo
+          ├── ứng dụng web
           └── PSI monitoring + review rate
 ```
 
@@ -73,7 +73,7 @@ uvicorn api:app --reload
 
 Mở:
 
-- web demo: `http://127.0.0.1:8000`
+- ứng dụng web: `http://127.0.0.1:8000`
 - OpenAPI: `http://127.0.0.1:8000/docs`
 - health check: `http://127.0.0.1:8000/health`
 
@@ -94,7 +94,7 @@ streamlit run app.py
 | `POST` | `/predict` | chấm một lịch hẹn + yếu tố tác động |
 | `POST` | `/predict-batch` | chấm tối đa 500 lịch mỗi request |
 | `POST` | `/monitor` | PSI, review rate và trạng thái drift |
-| `GET` | `/monitor/demo` | hai kịch bản monitoring tái lập cho web demo |
+| `GET` | `/monitor/scenario` | hai kịch bản monitoring tái lập để kiểm tra hệ thống |
 
 Ví dụ:
 

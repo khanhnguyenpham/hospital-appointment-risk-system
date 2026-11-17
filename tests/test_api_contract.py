@@ -51,15 +51,15 @@ def test_monitoring_contract():
     assert payload["psi"] >= 0
 
 
-def test_monitoring_demo_separates_reference_and_shifted_batches():
-    normal = client.get("/monitor/demo?scenario=normal").json()
-    shifted = client.get("/monitor/demo?scenario=shifted").json()
+def test_monitoring_scenario_separates_reference_and_shifted_batches():
+    normal = client.get("/monitor/scenario?scenario=normal").json()
+    shifted = client.get("/monitor/scenario?scenario=shifted").json()
     assert normal["status"] == "stable"
     assert shifted["psi"] > normal["psi"]
     assert shifted["status"] == "investigate"
 
 
-def test_web_demo_is_served():
+def test_web_app_is_served():
     response = client.get("/")
     assert response.status_code == 200
     assert "Ưu tiên nhắc lịch" in response.text

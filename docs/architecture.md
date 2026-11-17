@@ -33,7 +33,7 @@
 - `run_pipeline.py` là entrypoint tái lập dữ liệu, SQLite, model và reports.
 - Preprocessing nằm trong `sklearn.Pipeline` để train và inference dùng đúng một logic.
 - Bundle chứa model version, schema version, threshold và score distribution tham chiếu.
-- FastAPI phục vụ cả API và static frontend, nên demo chỉ cần một service.
+- FastAPI phục vụ cả API và static frontend, nên ứng dụng chỉ cần một service.
 - Batch và online cùng đọc một bundle; không có hai phiên bản logic chấm điểm.
 - Health endpoint trả readiness cùng model version để đối chiếu khi vận hành.
 

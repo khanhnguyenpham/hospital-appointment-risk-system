@@ -41,7 +41,7 @@ Insurance = Literal["Public", "Private", "Self-pay"]
 app = FastAPI(
     title="API hỗ trợ ưu tiên nhắc lịch ngoại trú",
     version="1.0.0",
-    description="Demo portfolio trên dữ liệu tổng hợp; không phải hệ thống lâm sàng.",
+    description="Hệ thống portfolio trên dữ liệu tổng hợp; không phải hệ thống lâm sàng.",
 )
 
 
@@ -205,7 +205,8 @@ def monitor(batch: AppointmentBatch) -> dict:
     return {"model_version": bundle["model_version"], **report}
 
 
-@app.get("/monitor/demo")
+@app.get("/monitor/scenario")
+@app.get("/monitor/demo", include_in_schema=False)
 def monitor_demo(scenario: Literal["normal", "shifted"] = "normal") -> dict:
     """Return a reproducible monitoring example without exposing row-level data."""
     bundle = get_bundle()
