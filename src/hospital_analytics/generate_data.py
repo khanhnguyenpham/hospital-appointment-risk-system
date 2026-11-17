@@ -46,9 +46,15 @@ def generate_appointments(rows: int = 8000, seed: int = RANDOM_SEED) -> pd.DataF
     department_weights = [DEPARTMENTS[name]["weight"] for name in department_names]
     departments = rng.choice(department_names, size=rows, p=department_weights)
 
-    hours = rng.choice(np.arange(7, 17), size=rows, p=[0.08, 0.13, 0.13, 0.12, 0.10, 0.08, 0.10, 0.10, 0.09, 0.07])
+    hours = rng.choice(
+        np.arange(7, 17),
+        size=rows,
+        p=[0.08, 0.13, 0.13, 0.12, 0.10, 0.08, 0.10, 0.10, 0.09, 0.07],
+    )
     lead_days = np.clip(rng.gamma(shape=2.2, scale=5.0, size=rows).round().astype(int), 0, 60)
-    booked_at = appointment_dates - pd.to_timedelta(lead_days, unit="D") + pd.to_timedelta(rng.integers(8, 17, rows), unit="h")
+    booked_at = (
+        appointment_dates - pd.to_timedelta(lead_days, unit="D") + pd.to_timedelta(rng.integers(8, 17, rows), unit="h")
+    )
 
     patient_pool = max(1800, rows // 3)
     patient_numbers = rng.integers(0, patient_pool, size=rows)
@@ -142,4 +148,3 @@ def save_raw_data(rows: int = 8000, seed: int = RANDOM_SEED) -> pd.DataFrame:
 if __name__ == "__main__":
     data = save_raw_data()
     print(f"Generated {len(data):,} appointments at {datetime.now():%Y-%m-%d %H:%M}")
-

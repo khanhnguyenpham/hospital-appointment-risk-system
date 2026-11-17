@@ -1,18 +1,29 @@
-# Decision log
+# Nhật ký quyết định
 
-## Why synthetic data?
+## Vì sao dùng dữ liệu tổng hợp?
 
-Real patient and appointment data are sensitive. A reproducible generator lets me demonstrate data engineering and analysis without implying access to confidential hospital records.
+Lịch sử bệnh nhân và lịch khám là dữ liệu nhạy cảm. Generator có seed cố định cho phép minh họa data engineering và ML mà không ngụ ý tôi có quyền truy cập dữ liệu của bệnh viện thật.
 
-## Why a time-based split?
+## Vì sao chia theo thời gian?
 
-A random split can put future appointments into training and older appointments into testing. I use the oldest 70% for training, the next 15% for validation and the newest 15% for testing.
+Random split có thể đưa lịch hẹn tương lai vào train và lịch cũ vào test. Project dùng 70% bản ghi cũ nhất cho train, 15% tiếp theo cho validation và 15% mới nhất cho test.
 
-## Why logistic regression?
+## Vì sao logistic regression?
 
-The project needs a reliable baseline and understandable probabilities. A more complex model may improve ranking, but it should only replace this baseline after measuring the trade-off between performance and explainability.
+Đây là baseline dễ kiểm tra, chạy nhanh và có thể phân tích contribution theo từng dự đoán. Model phức tạp chỉ nên thay thế khi cải thiện có ý nghĩa trên dữ liệu thật và trade-off về calibration, latency, giải thích được chấp nhận.
 
-## Why no automated reminders?
+## Vì sao threshold không chỉ tối ưu F1?
 
-The project only ranks appointments. Sending messages would require consent, workflow ownership and monitoring. Keeping a human review step is the safer design for a portfolio prototype.
+Một đội nhắc lịch có năng lực hữu hạn. Project tìm threshold có F1 tốt trong các ngưỡng mà tỷ lệ review trên validation không vượt 30%. Con số 30% là giả định vận hành có ghi rõ, không phải sự thật về bệnh viện nào.
 
+## Vì sao không tự động gửi nhắc lịch?
+
+Gửi tin cần consent, ownership, template được duyệt, giới hạn tần suất, xử lý opt-out và audit. Prototype chỉ xếp hạng; nhân viên vẫn quyết định hành động.
+
+## Vì sao giữ kết quả calibration chưa hơn baseline?
+
+Brier score của logistic regression gần nhưng chưa tốt hơn baseline tỷ lệ lớp. Xóa chi tiết này sẽ làm project trông đẹp hơn nhưng thiếu trung thực. Model hiện phù hợp để thử nghiệm **ranking queue**, chưa đủ cơ sở để tuyên bố xác suất production-ready.
+
+## Vì sao PSI không tự động retrain?
+
+Score drift có thể do mùa vụ, thay đổi quy trình, lỗi dữ liệu hoặc thay đổi thật trong quần thể. Retrain tự động có thể hấp thụ lỗi. Cảnh báo phải dẫn tới điều tra và đánh giá có nhãn trước.

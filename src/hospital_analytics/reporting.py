@@ -17,8 +17,8 @@ def create_figures(frame: pd.DataFrame) -> None:
     )
     fig, axis = plt.subplots(figsize=(9, 5))
     axis.barh(department["department"], department["no_show_rate"] * 100, color="#247ba0")
-    axis.set_xlabel("No-show rate (%)")
-    axis.set_title("No-show rate by department")
+    axis.set_xlabel("Tỷ lệ bỏ hẹn (%)")
+    axis.set_title("Tỷ lệ bỏ hẹn theo khoa")
     axis.grid(axis="x", alpha=0.2)
     fig.tight_layout()
     fig.savefig(FIGURE_DIR / "no_show_by_department.png", dpi=160)
@@ -28,8 +28,8 @@ def create_figures(frame: pd.DataFrame) -> None:
     wait = completed.groupby("department")["wait_minutes"].mean().sort_values()
     fig, axis = plt.subplots(figsize=(9, 5))
     axis.barh(wait.index, wait.values, color="#70c1b3")
-    axis.set_xlabel("Average wait (minutes)")
-    axis.set_title("Average waiting time by department")
+    axis.set_xlabel("Thời gian chờ trung bình (phút)")
+    axis.set_title("Thời gian chờ theo khoa")
     axis.grid(axis="x", alpha=0.2)
     fig.tight_layout()
     fig.savefig(FIGURE_DIR / "wait_time_by_department.png", dpi=160)
@@ -40,9 +40,8 @@ def operational_summary(frame: pd.DataFrame) -> dict[str, float | int]:
     active = frame.loc[frame["status"] != "Cancelled"]
     completed = frame.loc[frame["status"] == "Completed"]
     return {
-        "appointments": int(len(frame)),
+        "appointments": len(frame),
         "completed": int((frame["status"] == "Completed").sum()),
         "no_show_rate_pct": round(float(active["no_show"].mean() * 100), 2),
         "avg_wait_minutes": round(float(completed["wait_minutes"].mean()), 1),
     }
-

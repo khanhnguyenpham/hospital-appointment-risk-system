@@ -18,4 +18,3 @@ def test_hour_range_is_validated():
             district="Central Buon Ma Thuot",
             insurance_type="Public",
         )
-

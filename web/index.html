@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Demo AI system hỗ trợ ưu tiên nhắc lịch ngoại trú trên dữ liệu tổng hợp.">
+  <title>Điều phối lịch hẹn · AI system demo</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#tong-quan"><span class="brand-mark">K</span><span>Khánh · AI Systems</span></a>
+    <nav aria-label="Điều hướng chính">
+      <a href="#tong-quan">Tổng quan</a>
+      <a href="#thu-nghiem">Thử mô hình</a>
+      <a href="#giam-sat">Giám sát</a>
+      <a href="#quan-tri">Quản trị</a>
+    </nav>
+    <a class="api-link" href="/docs">API docs ↗</a>
+  </header>
+
+  <main>
+    <section class="hero" id="tong-quan">
+      <div class="hero-copy">
+        <p class="eyebrow">PROJECT 03 · AI SYSTEMS</p>
+        <h1>Ưu tiên nhắc lịch,<br><span>không tự động quyết định.</span></h1>
+        <p class="lead">Một hệ thống nhỏ nhưng đầy đủ để xếp hạng lịch hẹn ngoại trú có nguy cơ bỏ hẹn: từ kiểm tra dữ liệu, huấn luyện theo thời gian, API dự đoán đến theo dõi drift.</p>
+        <div class="hero-actions">
+          <a class="button primary" href="#thu-nghiem">Thử một dự đoán</a>
+          <a class="button secondary" href="#quan-tri">Xem giới hạn hệ thống</a>
+        </div>
+        <p class="disclaimer">Dữ liệu 100% tổng hợp · Không chẩn đoán · Không dùng thông tin bệnh nhân thật</p>
+      </div>
+      <div class="system-card">
+        <div class="system-status"><span class="pulse"></span><span id="system-status">Đang kiểm tra hệ thống</span></div>
+        <p class="system-label">LUỒNG XỬ LÝ</p>
+        <div class="pipeline">
+          <div><b>01</b><span>Dữ liệu lịch hẹn</span><small>schema + quality gates</small></div>
+          <i>↓</i>
+          <div><b>02</b><span>Risk model</span><small>time split + baseline</small></div>
+          <i>↓</i>
+          <div><b>03</b><span>Hàng đợi xem xét</span><small>human in the loop</small></div>
+          <i>↓</i>
+          <div><b>04</b><span>Monitoring</span><small>PSI + review rate</small></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="metrics-section section-shell" aria-labelledby="metrics-title">
+      <div class="section-heading compact">
+        <p class="eyebrow">REFERENCE RUN</p>
+        <h2 id="metrics-title">Hiệu năng được đặt trong bối cảnh vận hành</h2>
+      </div>
+      <div class="metric-grid">
+        <article><span>ROC–AUC / test</span><strong id="metric-auc">—</strong><small id="metric-baseline">baseline —</small></article>
+        <article><span>Recall / test</span><strong id="metric-recall">—</strong><small>ca bỏ hẹn được nhận diện</small></article>
+        <article><span>Review rate / test</span><strong id="metric-review">—</strong><small>giới hạn năng lực 30%</small></article>
+        <article><span>Dữ liệu tổng hợp</span><strong id="metric-rows">—</strong><small id="metric-period">đang tải</small></article>
+      </div>
+      <div class="evidence-grid">
+        <article class="panel chart-panel">
+          <div class="panel-title"><div><p class="eyebrow">VẬN HÀNH</p><h3>Tỷ lệ bỏ hẹn theo khoa</h3></div><span class="tag">descriptive</span></div>
+          <div id="department-chart" class="bar-chart loading-block"></div>
+        </article>
+        <article class="panel chart-panel">
+          <div class="panel-title"><div><p class="eyebrow">DỮ LIỆU</p><h3>Nhu cầu theo tháng</h3></div><span class="tag">2025–2026</span></div>
+          <div id="monthly-chart" class="line-chart loading-block"></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="workbench" id="thu-nghiem">
+      <div class="section-shell">
+        <div class="section-heading">
+          <p class="eyebrow">PREDICTION WORKBENCH</p>
+          <h2>Thử một lịch hẹn giả lập</h2>
+          <p>Form gọi trực tiếp FastAPI đang chạy cùng giao diện. Kết quả là tín hiệu ưu tiên cho nhân viên, không phải quyết định tự động.</p>
+        </div>
+        <div class="workbench-grid">
+          <form id="prediction-form" class="panel form-panel">
+            <div class="form-grid">
+              <label>Khoa<select name="department"><option value="Internal Medicine">Nội tổng quát</option><option value="Pediatrics">Nhi</option><option value="Cardiology" selected>Tim mạch</option><option value="Orthopedics">Chấn thương chỉnh hình</option><option value="Ophthalmology">Mắt</option><option value="Endocrinology">Nội tiết</option></select></label>
+              <label>Khung giờ<input name="appointment_hour" type="number" min="7" max="16" value="8"></label>
+              <label>Thứ trong tuần<select name="weekday"><option value="0" selected>Thứ Hai</option><option value="1">Thứ Ba</option><option value="2">Thứ Tư</option><option value="3">Thứ Năm</option><option value="4">Thứ Sáu</option><option value="5">Thứ Bảy</option><option value="6">Chủ Nhật</option></select></label>
+              <label>Tháng<input name="month" type="number" min="1" max="12" value="9"></label>
+              <label>Đặt trước (ngày)<input name="lead_days" type="number" min="0" max="365" value="18"></label>
+              <label>Số lần khám trước<input name="prior_visits" type="number" min="0" max="100" value="3"></label>
+              <label>Số lần bỏ hẹn trước<input name="prior_no_shows" type="number" min="0" max="100" value="2"></label>
+              <label>Đã gửi nhắc lịch<select name="reminder_sent"><option value="0" selected>Chưa gửi</option><option value="1">Đã gửi</option></select></label>
+              <label>Nhóm tuổi<select name="age_group"><option>0-17</option><option>18-24</option><option>25-44</option><option selected>45-64</option><option>65+</option></select></label>
+              <label>Khu vực<select name="district"><option value="Central Buon Ma Thuot">Trung tâm Buôn Ma Thuột</option><option value="Outer Buon Ma Thuot">Ngoại vi Buôn Ma Thuột</option><option value="Outside Buon Ma Thuot" selected>Ngoài Buôn Ma Thuột</option></select></label>
+              <label>Thanh toán<select name="insurance_type"><option value="Public" selected>BHYT</option><option value="Private">Bảo hiểm tư</option><option value="Self-pay">Tự chi trả</option></select></label>
+            </div>
+            <button class="button primary submit-button" type="submit">Tính điểm rủi ro</button>
+          </form>
+
+          <aside class="panel result-panel" aria-live="polite">
+            <p class="eyebrow">KẾT QUẢ</p>
+            <div class="gauge" style="--value: 0" id="risk-gauge"><div><strong id="risk-value">—</strong><span>xác suất bỏ hẹn</span></div></div>
+            <div id="risk-badge" class="decision neutral">Chưa có dự đoán</div>
+            <p id="risk-action" class="result-action">Điền thông tin rồi chọn “Tính điểm rủi ro”.</p>
+            <div class="contributions"><h4>Yếu tố tác động lớn trong dự đoán</h4><div id="contribution-list"><p class="muted">Sẽ hiển thị sau khi chấm điểm.</p></div></div>
+            <p class="model-version" id="prediction-version">model —</p>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="monitor-section section-shell" id="giam-sat">
+      <div class="section-heading">
+        <p class="eyebrow">MODEL MONITORING</p>
+        <h2>Không dừng lại sau khi deploy</h2>
+        <p>PSI so sánh phân phối điểm của batch mới với dữ liệu tham chiếu khi huấn luyện. Đây là cảnh báo điều tra, không tự động retrain.</p>
+      </div>
+      <div class="monitor-grid">
+        <article class="panel monitor-control">
+          <h3>Giả lập batch đầu vào</h3>
+          <p>Batch “bình thường” gần với dữ liệu gốc. Batch “dịch chuyển” có nhiều lịch đặt xa ngày, chưa nhắc và từng bỏ hẹn.</p>
+          <div class="segmented"><button type="button" data-scenario="normal" class="active">Bình thường</button><button type="button" data-scenario="shifted">Dịch chuyển</button></div>
+          <button id="run-monitor" class="button secondary full" type="button">Chạy kiểm tra drift</button>
+        </article>
+        <article class="panel monitor-result">
+          <div><span>Trạng thái</span><strong id="drift-status">Chưa chạy</strong></div>
+          <div><span>PSI</span><strong id="drift-psi">—</strong></div>
+          <div><span>Tỷ lệ review</span><strong id="drift-review">—</strong></div>
+          <div><span>Cỡ batch</span><strong id="drift-size">—</strong></div>
+          <p id="drift-note">Chọn kịch bản và chạy kiểm tra.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="governance" id="quan-tri">
+      <div class="section-shell">
+        <div class="section-heading inverse">
+          <p class="eyebrow">DESIGN BOUNDARIES</p>
+          <h2>Rõ cái hệ thống làm được — và không làm được</h2>
+        </div>
+        <div class="boundary-grid">
+          <article><span>01</span><h3>Dữ liệu an toàn để trình diễn</h3><p>Toàn bộ lịch hẹn được sinh bằng code với seed cố định. ID là chuỗi băm giả lập, không đại diện người thật.</p></article>
+          <article><span>02</span><h3>Đánh giá gần thực tế hơn</h3><p>Train, validation và test được chia theo thời gian. Tập mới nhất chỉ dùng để đánh giá cuối.</p></article>
+          <article><span>03</span><h3>Năng lực vận hành là ràng buộc</h3><p>Ngưỡng được chọn sao cho hàng đợi validation không vượt 30%, thay vì tối ưu chỉ số mà bỏ qua khối lượng công việc.</p></article>
+          <article><span>04</span><h3>Người dùng giữ quyền quyết định</h3><p>Mô hình chỉ gợi ý lịch cần xem xét. Không hủy lịch, từ chối khám hay gửi tin nhắn tự động.</p></article>
+        </div>
+        <div class="tech-row"><span>Python</span><span>scikit-learn</span><span>FastAPI</span><span>SQLite</span><span>Docker</span><span>pytest</span></div>
+      </div>
+    </section>
+  </main>
+
+  <footer><p>Tự xây dựng để minh họa năng lực AI Systems · Dữ liệu tổng hợp, không liên kết với bệnh viện cụ thể.</p><a href="/docs">OpenAPI</a></footer>
+  <script src="/assets/app.js" defer></script>
+</body>
+</html>

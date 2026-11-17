@@ -19,4 +19,3 @@ def test_no_show_target_must_match_status():
     frame = generate_appointments(rows=50, seed=7)
     frame.loc[0, "no_show"] = 1 - int(frame.loc[0, "no_show"])
     assert "no_show does not match status" in validate_appointments(frame)
-

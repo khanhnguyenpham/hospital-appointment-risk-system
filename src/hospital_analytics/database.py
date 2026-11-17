@@ -4,7 +4,12 @@ import sqlite3
 
 import pandas as pd
 
-from .config import CLEAN_APPOINTMENTS, DATABASE_PATH, RAW_APPOINTMENTS, ensure_directories
+from .config import (
+    CLEAN_APPOINTMENTS,
+    DATABASE_PATH,
+    RAW_APPOINTMENTS,
+    ensure_directories,
+)
 from .data_quality import assert_valid_appointments
 from .generate_data import DEPARTMENTS
 
@@ -19,7 +24,16 @@ def load_raw_data() -> pd.DataFrame:
 def clean_and_validate(frame: pd.DataFrame) -> pd.DataFrame:
     cleaned = frame.copy()
     cleaned["appointment_date"] = pd.to_datetime(cleaned["appointment_date"]).dt.normalize()
-    for column in ["appointment_hour", "prior_visits", "prior_no_shows", "reminder_sent", "no_show", "lead_days", "weekday", "month"]:
+    for column in [
+        "appointment_hour",
+        "prior_visits",
+        "prior_no_shows",
+        "reminder_sent",
+        "no_show",
+        "lead_days",
+        "weekday",
+        "month",
+    ]:
         cleaned[column] = pd.to_numeric(cleaned[column], errors="raise").astype(int)
     assert_valid_appointments(cleaned)
     return cleaned.sort_values(["appointment_date", "appointment_hour", "appointment_id"]).reset_index(drop=True)
@@ -66,4 +80,3 @@ def prepare_data_store() -> pd.DataFrame:
     frame.to_csv(CLEAN_APPOINTMENTS, index=False, date_format="%Y-%m-%d %H:%M:%S")
     build_database(frame)
     return frame
-

@@ -17,7 +17,10 @@ MODEL_FEATURES = NUMERIC_FEATURES + CATEGORICAL_FEATURES
 
 
 def modelling_frame(frame: pd.DataFrame) -> pd.DataFrame:
-    eligible = frame.loc[frame["status"] != "Cancelled", MODEL_FEATURES + [TARGET, "appointment_date", "appointment_id"]].copy()
+    eligible = frame.loc[
+        frame["status"] != "Cancelled",
+        [*MODEL_FEATURES, TARGET, "appointment_date", "appointment_id"],
+    ].copy()
     return eligible.sort_values("appointment_date").reset_index(drop=True)
 
 
@@ -27,5 +30,8 @@ def chronological_split(frame: pd.DataFrame, train_fraction: float = 0.70, valid
     ordered = frame.sort_values("appointment_date").reset_index(drop=True)
     train_end = int(len(ordered) * train_fraction)
     validation_end = int(len(ordered) * (train_fraction + validation_fraction))
-    return ordered.iloc[:train_end], ordered.iloc[train_end:validation_end], ordered.iloc[validation_end:]
-
+    return (
+        ordered.iloc[:train_end],
+        ordered.iloc[train_end:validation_end],
+        ordered.iloc[validation_end:],
+    )

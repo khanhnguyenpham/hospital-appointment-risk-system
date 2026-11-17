@@ -3,10 +3,10 @@ requires = ["setuptools>=75"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "hospital-operations-analytics"
-version = "0.1.0"
-description = "Synthetic hospital appointment analytics and no-show risk system"
-requires-python = ">=3.10"
+name = "hospital-appointment-risk-system"
+version = "1.0.0"
+description = "Reproducible appointment no-show prioritization and monitoring system"
+requires-python = ">=3.11,<3.14"
 dependencies = [
   "pandas>=2.2,<3.0",
   "numpy>=2.0,<3.0",
@@ -18,7 +18,21 @@ dependencies = [
 where = ["src"]
 
 [tool.pytest.ini_options]
-pythonpath = ["src"]
+pythonpath = [".", "src"]
 testpaths = ["tests"]
 addopts = "-q"
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "C4", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+"api.py" = ["E402"]
+"app.py" = ["E402", "E501"]
+"batch_score.py" = ["E402"]
+"run_pipeline.py" = ["E402"]
+"src/hospital_analytics/train.py" = ["E501"]
 

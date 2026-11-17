@@ -15,4 +15,3 @@ def test_cancelled_appointments_are_not_used_for_modelling():
     model_data = modelling_frame(raw)
     cancelled_ids = set(raw.loc[raw["status"] == "Cancelled", "appointment_id"])
     assert cancelled_ids.isdisjoint(set(model_data["appointment_id"]))
-

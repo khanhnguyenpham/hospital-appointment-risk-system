@@ -1,12 +1,13 @@
-# Data folders
+# Dữ liệu
 
-- `raw/appointments.csv`: synthetic source file created by the generator.
-- `processed/appointments_clean.csv`: validated and feature-ready data.
-- `processed/hospital_operations.db`: SQLite database with appointment and department tables.
+- `raw/appointments.csv`: nguồn tổng hợp do generator tạo.
+- `processed/appointments_clean.csv`: dữ liệu đã qua quality gates.
+- `processed/hospital_operations.db`: SQLite gồm bảng lịch hẹn và khoa.
 
-Generated files are excluded from Git because they can be reproduced with:
+Các file sinh ra không commit vào Git vì có thể tái lập bằng:
 
 ```bash
 python run_pipeline.py
 ```
 
+Generator dùng seed 42. ID bệnh nhân là chuỗi băm giả lập và không đại diện cá nhân thật.

@@ -53,4 +53,3 @@ def assert_valid_appointments(frame: pd.DataFrame) -> None:
     errors = validate_appointments(frame)
     if errors:
         raise ValueError("Data quality checks failed:\n- " + "\n- ".join(errors))
-

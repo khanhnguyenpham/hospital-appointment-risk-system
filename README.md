@@ -1,116 +1,172 @@
-# Hospital Appointment Risk System
+# Hệ thống ưu tiên nhắc lịch ngoại trú
 
-A small AI system for a practical hospital operations problem: **how to identify outpatient appointments that may need an additional reminder**.
+[![CI](https://github.com/khanhnguyenpham/hospital-appointment-risk-system/actions/workflows/ci.yml/badge.svg)](https://github.com/khanhnguyenpham/hospital-appointment-risk-system/actions/workflows/ci.yml)
 
-I built this project to practice the full workflow instead of stopping at a notebook:
+Project AI Systems tập trung vào một bài toán vận hành có ranh giới rõ: **xếp hạng lịch hẹn ngoại trú để nhân viên ưu tiên nhắc lịch**. Đây không phải notebook trình diễn. Repository có pipeline dữ liệu, quality gates, mô hình có baseline, API online/batch, theo dõi drift, giao diện web và tài liệu quản trị mô hình.
 
-- generate a realistic synthetic dataset with no patient-identifying information;
-- validate and load the data into SQLite;
-- answer operational questions with SQL and Python;
-- train and evaluate a no-show risk model;
-- expose the model through a small API;
-- present model results and operational context in a Streamlit dashboard.
+> 100% dữ liệu là dữ liệu tổng hợp. Project không liên kết với Bệnh viện Thiện Hạnh hay bất kỳ cơ sở y tế cụ thể nào; không chẩn đoán và không tự động từ chối, hủy hoặc dời lịch khám.
 
-This is a decision-support demo, not a medical product. It does not diagnose patients or recommend treatment. The analysis-only and general Python engineering work are intentionally kept in separate repositories; this repository focuses on training/serving boundaries, validation and honest model evaluation.
+## Vì sao tôi làm project này
 
-## System questions
+Tôi muốn chứng minh khả năng nối các phần thường bị tách rời trong một bài ML: dữ liệu đầu vào, đánh giá trung thực, giới hạn vận hành, phục vụ mô hình và giám sát sau triển khai. Câu hỏi chính không chỉ là “mô hình chính xác bao nhiêu” mà còn là:
 
-1. Which departments and time slots have the highest no-show rates?
-2. How long do patients wait after arriving?
-3. Does sending a reminder relate to a lower no-show rate?
-4. Can a simple, explainable baseline create a useful review queue?
-5. How should the model be exposed without turning a score into an automatic decision?
+- dữ liệu có đúng schema và không bị leakage hay không;
+- mô hình có tốt hơn baseline đơn giản hay không;
+- đội vận hành có xử lý nổi số lịch bị gắn cờ hay không;
+- khi phân phối đầu vào thay đổi thì ai được cảnh báo;
+- điểm số được phép và không được phép dùng vào việc gì.
 
-## Project structure
+## Luồng hệ thống
 
 ```text
-hospital-appointment-risk-system/
-|-- app.py                    # Streamlit dashboard
-|-- api.py                    # FastAPI prediction endpoint
-|-- run_pipeline.py           # one-command data + model pipeline
-|-- data/
-|   |-- raw/                  # generated source data
-|   `-- processed/            # cleaned CSV and SQLite database
-|-- docs/                     # architecture, data dictionary, decisions
-|-- models/                   # trained model and evaluation metrics
-|-- reports/figures/          # generated charts
-|-- sql/analysis_queries.sql  # reusable analyst queries
-|-- src/hospital_analytics/   # Python package
-`-- tests/                    # data quality and feature tests
+Synthetic generator ──> validation ──> CSV + SQLite
+                              │
+                              v
+                   chronological split
+                    train / val / test
+                              │
+                              v
+           preprocessing + logistic regression
+                    │                    │
+                    v                    v
+             model bundle          model card
+                    │
+          ┌─────────┴──────────┐
+          v                    v
+    FastAPI online       batch scoring
+          │
+          ├── web demo
+          └── PSI monitoring + review rate
 ```
 
-## Quick start
+Chi tiết hơn tại [docs/architecture.md](docs/architecture.md).
+
+## Kết quả tham chiếu
+
+Pipeline sử dụng seed 42 và chia theo thời gian: 70% train, 15% validation, 15% test. Ngưỡng được chọn trên validation với ràng buộc tối đa 30% lịch hẹn đi vào hàng đợi xem xét.
+
+| Chỉ số trên test | Logistic regression | Baseline theo tỷ lệ lớp |
+|---|---:|---:|
+| ROC–AUC | 0.678 | 0.500 |
+| Brier score ↓ | 0.152 | 0.150 |
+| Precision | 0.347 | 0.000 |
+| Recall | 0.517 | 0.000 |
+| F1 | 0.415 | 0.000 |
+| Tỷ lệ đưa vào review | 30.4% | 0.0% |
+
+ROC–AUC cho thấy mô hình xếp hạng tốt hơn ngẫu nhiên, nhưng Brier score chưa vượt baseline tỷ lệ lớp. Tôi giữ kết quả này vì nó phản ánh đúng trade-off: mô hình có ích để tạo hàng đợi ưu tiên, chưa đủ để coi xác suất là dự báo đã hiệu chỉnh hoàn hảo. Xem đầy đủ tại [docs/model_card.md](docs/model_card.md).
+
+## Chạy project
+
+Yêu cầu Python 3.11–3.13.
 
 ```bash
 python -m venv .venv
+# Windows
 .venv\Scripts\activate
+# macOS/Linux: source .venv/bin/activate
+
 pip install -r requirements.txt
 python run_pipeline.py
-streamlit run app.py
-```
-
-On macOS/Linux, activate the environment with `source .venv/bin/activate`.
-
-The pipeline uses a fixed random seed, so another person can reproduce the same dataset and metrics.
-
-## Run the API
-
-```bash
 uvicorn api:app --reload
 ```
 
-Then open `http://127.0.0.1:8000/docs` and try `POST /predict`.
+Mở:
 
-Example request:
+- web demo: `http://127.0.0.1:8000`
+- OpenAPI: `http://127.0.0.1:8000/docs`
+- health check: `http://127.0.0.1:8000/health`
 
-```json
-{
-  "department": "Cardiology",
-  "appointment_hour": 8,
-  "weekday": 0,
-  "lead_days": 18,
-  "prior_no_shows": 2,
-  "reminder_sent": 0,
-  "age_group": "45-64",
-  "district": "Outside Buon Ma Thuot",
-  "insurance_type": "Public"
-}
+Dashboard Streamlit cho phân tích nội bộ là phần tùy chọn:
+
+```bash
+pip install -r requirements-dashboard.txt
+streamlit run app.py
 ```
 
-## Main outputs
+## API chính
 
-- `data/processed/hospital_operations.db`: SQLite database for SQL analysis.
-- `models/no_show_model.joblib`: fitted preprocessing + logistic regression pipeline.
-- `models/model_metrics.json`: test-set metrics and threshold information.
-- `reports/figures/`: charts generated by the pipeline.
+| Method | Endpoint | Mục đích |
+|---|---|---|
+| `GET` | `/health` | readiness và phiên bản model |
+| `GET` | `/metadata` | metrics, threshold, subgroup evaluation |
+| `GET` | `/analytics/summary` | số liệu tổng hợp cho dashboard |
+| `POST` | `/predict` | chấm một lịch hẹn + yếu tố tác động |
+| `POST` | `/predict-batch` | chấm tối đa 500 lịch mỗi request |
+| `POST` | `/monitor` | PSI, review rate và trạng thái drift |
+| `GET` | `/monitor/demo` | hai kịch bản monitoring tái lập cho web demo |
 
-## Model choice
+Ví dụ:
 
-I used logistic regression as the first model because the output is a risk probability and the coefficients are easier to discuss with operational staff. The goal is not to claim the most accurate model; it is to build a baseline that can be checked, explained and improved.
+```bash
+curl -X POST http://127.0.0.1:8000/predict \
+  -H "Content-Type: application/json" \
+  -d '{
+    "department": "Cardiology",
+    "appointment_hour": 8,
+    "weekday": 0,
+    "month": 9,
+    "lead_days": 18,
+    "prior_visits": 3,
+    "prior_no_shows": 2,
+    "reminder_sent": 0,
+    "age_group": "45-64",
+    "district": "Outside Buon Ma Thuot",
+    "insurance_type": "Public"
+  }'
+```
 
-The classification threshold is selected on the validation set to maximize F1 score. The test set is kept separate and represents the latest period in the data, which is closer to how the model would be evaluated in practice.
+Schema dùng enum và range validation; lịch sử bỏ hẹn không thể lớn hơn tổng số lần khám trước.
 
-### Reference run (seed 42)
+## Batch scoring
 
-| Metric | Test result |
-|---|---:|
-| ROC-AUC | 0.678 |
-| Precision | 0.273 |
-| Recall | 0.703 |
-| F1 | 0.393 |
+```bash
+python batch_score.py scheduled_appointments.csv scored_appointments.csv
+```
 
-The model favors recall because a missed high-risk appointment is more costly than reviewing an extra appointment. Precision is modest, so the output is explicitly a staff review flag rather than an automatic action. These values are from synthetic data and are not evidence of clinical or production performance.
+File đầu ra được xếp giảm dần theo xác suất để phục vụ **review thủ công**. Online API và batch job dùng cùng một model bundle, preprocessing và threshold.
 
-## What I would improve with real hospital data
+## Monitoring
 
-- confirm definitions with registration and clinical operations teams;
-- monitor data drift and subgroup performance;
-- compare predicted risk with the actual capacity of the reminder team;
-- use a time-series model for demand forecasting;
-- add authentication, audit logs and access controls;
-- complete privacy, security and clinical safety reviews before deployment.
+Endpoint `/monitor` so sánh phân phối điểm của batch mới với phân phối train bằng Population Stability Index (PSI):
 
-## Notes on the data
+- `< 0.10`: ổn định;
+- `0.10–0.25`: cần theo dõi;
+- `>= 0.25`: cần điều tra.
 
-All rows are generated by `src/hospital_analytics/generate_data.py`. Patient IDs are random hashes and do not represent real people. The fictional facility name is used only for this portfolio project.
+PSI chỉ là tín hiệu. Hệ thống không tự động retrain. Khi cảnh báo xuất hiện, quy trình đúng là kiểm tra schema, chất lượng dữ liệu, thay đổi nghiệp vụ và hiệu năng có nhãn trước.
 
+## Cấu trúc repository
+
+```text
+├── api.py                         # FastAPI + public web
+├── app.py                         # Streamlit analyst dashboard
+├── batch_score.py                 # chấm điểm file
+├── run_pipeline.py                # pipeline một lệnh
+├── web/                           # giao diện tiếng Việt
+├── src/hospital_analytics/        # data, feature, train, monitor
+├── tests/                         # quality, API, drift, split tests
+├── sql/analysis_queries.sql       # truy vấn vận hành
+├── docs/                          # kiến trúc, model card, decisions
+├── Dockerfile
+└── render.yaml
+```
+
+## Kiểm thử và container
+
+```bash
+ruff check .
+pytest
+docker build -t appointment-risk-system .
+docker run --rm -p 8000:8000 appointment-risk-system
+```
+
+CI chạy lint, test, pipeline tái lập và kiểm tra khởi động API trên Python 3.12.
+
+## Nếu có dữ liệu thật
+
+Trước pilot cần thống nhất định nghĩa bỏ hẹn, consent và thời điểm nhắc; đánh giá calibration và subgroup trên dữ liệu địa phương; kiểm soát truy cập, audit log, mã hóa, retention; theo dõi outcome sau hành động; và có phê duyệt riêng tư, bảo mật, pháp lý, an toàn lâm sàng. Những việc này không thể được “giả lập là đã xong” trong một portfolio project.
+
+## Tác giả
+
+Nguyễn Phạm Đức Khánh · Sinh viên Khoa học máy tính, quan tâm Data Analytics và AI Systems.
