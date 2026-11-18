@@ -6,7 +6,7 @@ Phiên bản hiện tại chứng minh một luồng AI Systems có thể tái l
 
 ### Đánh giá xác suất và threshold
 
-- Thêm reliability diagram và Expected Calibration Error.
+- Thêm reliability diagram để quan sát ECE theo từng khoảng xác suất.
 - So sánh calibration methods chỉ trên validation, giữ test cho đánh giá cuối.
 - Báo cáo ảnh hưởng của nhiều mức giới hạn hàng đợi thay vì cố định 30%.
 

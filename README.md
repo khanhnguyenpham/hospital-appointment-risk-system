@@ -62,13 +62,14 @@ Pipeline sử dụng seed 42 và chia theo thời gian: 70% train, 15% validatio
 | Chỉ số trên test | Logistic regression | Baseline theo tỷ lệ lớp |
 |---|---:|---:|
 | ROC–AUC | 0.678 | 0.500 |
-| Brier score ↓ | 0.152 | 0.150 |
+| Brier score ↓ | 0.152 | 0.163 |
+| Expected calibration error ↓ | 0.0288 | 0.0260 |
 | Precision | 0.347 | 0.000 |
 | Recall | 0.517 | 0.000 |
 | F1 | 0.415 | 0.000 |
 | Tỷ lệ đưa vào review | 30.4% | 0.0% |
 
-ROC–AUC cho thấy mô hình xếp hạng tốt hơn ngẫu nhiên, nhưng Brier score chưa vượt baseline tỷ lệ lớp. Tôi giữ kết quả này vì nó phản ánh đúng trade-off: mô hình có ích để tạo hàng đợi ưu tiên, chưa đủ để coi xác suất là dự báo đã hiệu chỉnh hoàn hảo. Xem đầy đủ tại [docs/model_card.md](docs/model_card.md).
+ROC–AUC cho thấy mô hình xếp hạng tốt hơn ngẫu nhiên, nhưng Brier score và Expected Calibration Error chưa vượt baseline tỷ lệ lớp. Tôi giữ kết quả này vì nó phản ánh đúng trade-off: mô hình có ích để tạo hàng đợi ưu tiên, chưa đủ để coi xác suất là dự báo đã hiệu chỉnh hoàn hảo. Xem đầy đủ tại [docs/model_card.md](docs/model_card.md).
 
 ## Chạy project
 
