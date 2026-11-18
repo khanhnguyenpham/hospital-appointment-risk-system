@@ -17,6 +17,7 @@ Mô hình xếp hạng các lịch hẹn cần nhân viên xem xét để ưu ti
 |---|---:|---:|
 | ROC-AUC | 0.6779 | 0.5000 |
 | Brier score | 0.1521 | 0.1631 |
+| Expected calibration error | 0.0288 | 0.0260 |
 | Precision | 0.3468 | 0.0000 |
 | Recall | 0.5172 | 0.0000 |
 | F1 | 0.4152 | 0.0000 |

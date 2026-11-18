@@ -80,12 +80,35 @@ def _operational_threshold(y_true: pd.Series, probabilities: np.ndarray) -> floa
     return max(candidates, key=lambda item: (item[0], item[1]))[1]
 
 
+def expected_calibration_error(
+    y_true: pd.Series | np.ndarray,
+    probabilities: np.ndarray,
+    bins: int = 10,
+) -> float:
+    if bins < 2:
+        raise ValueError("bins must be at least 2")
+    targets = np.asarray(y_true, dtype=float)
+    values = np.asarray(probabilities, dtype=float)
+    if len(targets) != len(values) or len(values) == 0:
+        raise ValueError("targets and probabilities must have the same non-zero length")
+
+    edges = np.linspace(0.0, 1.0, bins + 1)
+    assignments = np.digitize(values, edges[1:-1], right=True)
+    error = 0.0
+    for index in range(bins):
+        mask = assignments == index
+        if mask.any():
+            error += float(mask.mean()) * abs(float(targets[mask].mean()) - float(values[mask].mean()))
+    return error
+
+
 def _metrics(y_true: pd.Series, probabilities: np.ndarray, threshold: float) -> dict[str, float | int]:
     predictions = (probabilities >= threshold).astype(int)
     tn, fp, fn, tp = confusion_matrix(y_true, predictions, labels=[0, 1]).ravel()
     return {
         "roc_auc": round(float(roc_auc_score(y_true, probabilities)), 4),
         "brier_score": round(float(brier_score_loss(y_true, probabilities)), 4),
+        "expected_calibration_error": round(expected_calibration_error(y_true, probabilities), 4),
         "accuracy": round(float(accuracy_score(y_true, predictions)), 4),
         "precision": round(float(precision_score(y_true, predictions, zero_division=0)), 4),
         "recall": round(float(recall_score(y_true, predictions, zero_division=0)), 4),
@@ -154,6 +177,7 @@ Mô hình xếp hạng các lịch hẹn cần nhân viên xem xét để ưu ti
 |---|---:|---:|
 | ROC-AUC | {test["roc_auc"]:.4f} | {baseline["roc_auc"]:.4f} |
 | Brier score | {test["brier_score"]:.4f} | {baseline["brier_score"]:.4f} |
+| Expected calibration error | {test["expected_calibration_error"]:.4f} | {baseline["expected_calibration_error"]:.4f} |
 | Precision | {test["precision"]:.4f} | {baseline["precision"]:.4f} |
 | Recall | {test["recall"]:.4f} | {baseline["recall"]:.4f} |
 | F1 | {test["f1"]:.4f} | {baseline["f1"]:.4f} |
