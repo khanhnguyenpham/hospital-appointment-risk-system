@@ -6,6 +6,12 @@ Project AI Systems tập trung vào một bài toán vận hành có ranh giới
 
 > 100% dữ liệu là dữ liệu tổng hợp. Project không liên kết với Bệnh viện Thiện Hạnh hay bất kỳ cơ sở y tế cụ thể nào; không chẩn đoán và không tự động từ chối, hủy hoặc dời lịch khám.
 
+## Vị trí trong portfolio
+
+Đây là project tổng hợp phần tôi quan tâm nhất: đưa một mô hình từ pipeline dữ liệu sang API, giao diện, kiểm thử và monitoring có ranh giới sử dụng rõ ràng. Nền tảng phân tích và KPI nằm trong [project Data Analyst](https://github.com/khanhnguyenpham/outpatient-operations-analysis); phần transaction và nghiệp vụ backend nằm trong [Kho Gọn](https://github.com/khanhnguyenpham/inventory-order-management).
+
+Xem [lịch phát triển](CHANGELOG.md), [roadmap](ROADMAP.md) và [hành trình học tập 2022–2026](https://github.com/khanhnguyenpham).
+
 ## Dùng trực tuyến
 
 - Ứng dụng: [https://appointment-risk-system.onrender.com](https://appointment-risk-system.onrender.com)
